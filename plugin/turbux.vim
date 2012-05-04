@@ -24,7 +24,7 @@ endfunction
 
 function! s:prefix_for_test(file)
   if a:file =~# '_spec.rb$'
-    return "rspec "
+    return "rspec --format nested --color "
   elseif a:file =~# '\(\<test_.*\|_test\)\.rb$'
     return "ruby -Itest "
   elseif a:file =~# '.feature$'
@@ -35,6 +35,10 @@ function! s:prefix_for_test(file)
     endif
   endif
   return ''
+endfunction
+
+function! s:chdir_command(directory)
+  return "cd " . a:directory . "; "
 endfunction
 
 function! s:alternate_for_file(file)
@@ -48,7 +52,7 @@ function! s:alternate_for_file(file)
   return related_file
 endfunction
 
-function! s:command_for_file(file)
+function! s:command_for_file(directory, file)
   let executable=""
   let alternate_file = s:alternate_for_file(a:file)
   if s:prefix_for_test(a:file) != ''
@@ -56,7 +60,7 @@ function! s:command_for_file(file)
   elseif alternate_file != ''
     let executable = s:prefix_for_test(alternate_file) . alternate_file
   endif
-  return executable
+  return "clear; " . s:chdir_command(a:directory) . "time " . executable
 endfunction
 
 function! s:run_command_in_tmux(command)
@@ -96,22 +100,22 @@ function! s:execute_test_by_name()
 endfunction
 
 " Public functions
-function! SendTestToTmux(file) abort
-  let executable = s:command_for_file(a:file)
+function! SendTestToTmux(directory, file) abort
+  let executable = s:command_for_file(a:directory, a:file)
   if executable != ''
     let g:tmux_last_command = executable
   endif
   return s:send_test(executable)
 endfunction
 
-function! SendFocusedTestToTmux(file, line) abort
+function! SendFocusedTestToTmux(directory, file, line) abort
   let focus = ":".a:line
   if s:prefix_for_test(a:file) == 'ruby -Itest '
     let focus = s:execute_test_by_name()
   endif
 
   if s:prefix_for_test(a:file) != ''
-    let executable = s:command_for_file(a:file).focus
+    let executable = s:command_for_file(a:directory, a:file).focus
     let g:tmux_last_focused_command = executable
   elseif exists("g:tmux_last_focused_command") && g:tmux_last_focused_command != ''
     let executable = g:tmux_last_focused_command
@@ -122,8 +126,8 @@ function! SendFocusedTestToTmux(file, line) abort
 endfunction
 
 " Mappings
-nnoremap <silent> <Plug>SendTestToTmux :<C-U>w \| call SendTestToTmux(expand('%'))<CR>
-nnoremap <silent> <Plug>SendFocusedTestToTmux :<C-U>w \| call SendFocusedTestToTmux(expand('%'), line('.'))<CR>
+nnoremap <silent> <Plug>SendTestToTmux :<C-U>w \| call SendTestToTmux(expand('%:p:h'), expand('%'))<CR>
+nnoremap <silent> <Plug>SendFocusedTestToTmux :<C-U>w \| call SendFocusedTestToTmux(expand('%:p:h'), expand('%'), line('.'))<CR>
 
 if !exists("g:no_turbux_mappings")
   nmap <leader>t <Plug>SendTestToTmux
