@@ -23,8 +23,14 @@ function! s:first_readable_file(files) abort
 endfunction
 
 function! s:prefix_for_test(file)
+  let turbux_rspec  = "rspec"
+
+  if exists('g:turbux_rspec')
+    let turbux_rspec = g:turbux_rspec
+  endif
+
   if a:file =~# '_spec.rb$'
-    return "rspec --format nested --color "
+    return turbux_rspec . " --format nested --color "
   elseif a:file =~# '\(\<test_.*\|_test\)\.rb$'
     return "ruby -Itest "
   elseif a:file =~# '.feature$'
