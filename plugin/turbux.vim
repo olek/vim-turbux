@@ -44,7 +44,8 @@ function! s:prefix_for_test(file)
 endfunction
 
 function! s:chdir_command(directory)
-  return "cd " . a:directory . "; "
+"  return "cd " . a:directory . "; "
+  return "cd " . RailsRoot() . "; "
 endfunction
 
 function! s:alternate_for_file(file)
@@ -132,8 +133,8 @@ function! SendFocusedTestToTmux(directory, file, line) abort
 endfunction
 
 " Mappings
-nnoremap <silent> <Plug>SendTestToTmux :<C-U>w \| call SendTestToTmux(expand('%:p:h'), expand('%:t'))<CR>
-nnoremap <silent> <Plug>SendFocusedTestToTmux :<C-U>w \| call SendFocusedTestToTmux(expand('%:p:h'), expand('%:t'), line('.'))<CR>
+nnoremap <silent> <Plug>SendTestToTmux :<C-U>w \| call SendTestToTmux(expand('%:p:h'), expand('%:p'))<CR>
+nnoremap <silent> <Plug>SendFocusedTestToTmux :<C-U>w \| call SendFocusedTestToTmux(expand('%:p:h'), expand('%:p'), line('.'))<CR>
 
 if !exists("g:no_turbux_mappings")
   nmap <leader>t <Plug>SendTestToTmux
