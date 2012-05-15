@@ -107,6 +107,10 @@ function! s:execute_test_by_name()
 endfunction
 
 " Public functions
+function! SendLastTestToTmux() abort
+  return s:send_test('')
+endfunction
+
 function! SendTestToTmux(directory, file) abort
   let executable = s:command_for_file(a:directory, a:file)
   if executable != ''
@@ -123,9 +127,7 @@ function! SendFocusedTestToTmux(directory, file, line) abort
 
   if s:prefix_for_test(a:file) != ''
     let executable = s:command_for_file(a:directory, a:file).focus
-    let g:tmux_last_focused_command = executable
-  elseif exists("g:tmux_last_focused_command") && g:tmux_last_focused_command != ''
-    let executable = g:tmux_last_focused_command
+    let g:tmux_last_command = executable
   else
     let executable = ''
   endif
@@ -134,10 +136,12 @@ endfunction
 
 " Mappings
 nnoremap <silent> <Plug>SendTestToTmux :<C-U>w \| call SendTestToTmux(expand('%:p:h'), expand('%:p'))<CR>
+nnoremap <silent> <Plug>SendLastTestToTmux :<C-U>w \| call SendLastTestToTmux()<CR>
 nnoremap <silent> <Plug>SendFocusedTestToTmux :<C-U>w \| call SendFocusedTestToTmux(expand('%:p:h'), expand('%:p'), line('.'))<CR>
 
 if !exists("g:no_turbux_mappings")
   nmap <leader>t <Plug>SendTestToTmux
+  nmap <leader>tt <Plug>SendLastTestToTmux
   nmap <leader>T <Plug>SendFocusedTestToTmux
 endif
 
