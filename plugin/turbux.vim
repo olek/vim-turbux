@@ -30,7 +30,7 @@ function! s:prefix_for_test(file)
   endif
 
   if a:file =~# '_spec.rb$'
-    return turbux_rspec . " --format nested --color "
+    return turbux_rspec . " --format documentation --color "
   elseif a:file =~# '\(\<test_.*\|_test\)\.rb$'
     return "ruby -Itest "
   elseif a:file =~# '.feature$'
